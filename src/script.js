@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loadCarsBtn = document.getElementById('loadCarsBtn');
     const carList = document.getElementById('carList');
-    let cars = [];
-
+    cars = [];
     loadCarsBtn.addEventListener('click', () => {
-        fetch('/api/cars') // Use relative URL to access API
+        fetch('/api/message')
             .then(response => response.json())
             .then(data => {
                 cars = data;
@@ -30,21 +29,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function addCar(newCar) {
-    fetch('/api/cars', { // Use relative URL for API
+    fetch('/api/message', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(newCar)
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        document.getElementById('loadCarsBtn').click(); // Trigger load cars after adding
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            //reload cars
+            // const loadCarsBtn = document.getElementById('loadCarsBtn');
+            loadCarsBtn.click();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
 
 // Event delegation for remove buttons
@@ -55,20 +56,24 @@ document.getElementById('carList').addEventListener('click', event => {
     }
 });
 
+
+
 // Function to remove a car
 function removeCar(index) {
     const carId = cars[index].id;
-    fetch(`/api/cars${carId}`, { // Use relative URL for API
+    fetch(`/api/message/${carId}`, {
         method: 'DELETE'
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        document.getElementById('loadCarsBtn').click(); // Trigger load cars after removing
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            //reload cars
+            // const loadCarsBtn = document.getElementById('loadCarsBtn');
+            loadCarsBtn.click();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 }
 
 const carForm = document.getElementById('carForm');
