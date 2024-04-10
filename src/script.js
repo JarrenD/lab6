@@ -27,6 +27,38 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const addCarsBtn = document.getElementById('addCar');
+    const carList = document.getElementById('carList');
+    cars = [];
+
+    addCarsBtn.addEventListener('click', () => {
+        const make = document.getElementById('make').value;
+        const model = document.getElementById('model').value;
+        const year = document.getElementById('year').value;
+        const color = document.getElementById('color').value;
+        const price = document.getElementById('price').value;
+
+
+        const newCar = {
+            make: make,
+            model: model,
+            year: year,
+            color: color,
+            price: price
+        };
+
+        console.log("trying to add  car");
+        addCar(newCar);
+        const loadCarsBtn = document.getElementById('loadCarsBtn');
+        loadCarsBtn.click();
+});
+});
+
+// Assume newCar is already constructed
+
 function addCar(newCar) {
     fetch('/api/message', {
         method: 'POST',
@@ -35,45 +67,87 @@ function addCar(newCar) {
         },
         body: JSON.stringify(newCar)
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            //reload cars
-            // const loadCarsBtn = document.getElementById('loadCarsBtn');
-            loadCarsBtn.click();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to add car');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        // If you want to reload cars after adding a new car, you can call a function here
+        // For example:
+        // loadCars();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
-carForm.addEventListener('submit', event => {
-    event.preventDefault();
-    const make = document.getElementById('make').value;
-    const model = document.getElementById('model').value;
-    const year = document.getElementById('year').value;
-    const price = document.getElementById('price').value;
-    addCar({ make, model, year, price });
-    carForm.reset();
-});
+
+// Usage example:
+//addCar(newCar);
+
+
+// carForm.addEventListener('submit', event => {
+//     event.preventDefault();
+//     const make = document.getElementById('make').value;
+//     const model = document.getElementById('model').value;
+//     const year = document.getElementById('year').value;
+//     const price = document.getElementById('price').value;
+//     addCar({ make, model, year, price });
+//     carForm.reset();
+// });
 
 // Function to remove a car
-function removeCar(index) {
-    const carId = cars[index].id;
-    fetch(`/api/message/${carId}`, {
+
+// Event delegation for remove buttons
+// carList.addEventListener('click', event => {
+//     if (event.target.classList.contains('btn-remove')) {
+//         const index = event.target.dataset.index;
+//         removeCar(index);
+//     }
+// });
+
+
+// function removeCar(index) {
+//     const carId = cars[index].id;
+//     fetch(`/api/message/${carId}`, {
+//         method: 'DELETE'
+//     })
+//         .then(response => response.json())
+//         .then(data => {
+//             console.log('Success:', data);
+//             //reload cars
+//             // const loadCarsBtn = document.getElementById('loadCarsBtn');
+//             loadCarsBtn.click();
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//         });
+// }
+
+async function removeCar(index) {
+    fetch(`/api/message/${index}`, {
         method: 'DELETE'
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            //reload cars
-            // const loadCarsBtn = document.getElementById('loadCarsBtn');
-            loadCarsBtn.click();
+        .then(response => {
+            if (response.ok) {
+                console.log('Car deleted successfully');
+                loadCars(); // Reload cars after removing one
+            } else {
+                throw new Error('Failed to delete car');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
         });
 }
+
+
+
+
+
 // Event delegation for remove buttons
 carList.addEventListener('click', event => {
     if (event.target.classList.contains('btn-remove')) {

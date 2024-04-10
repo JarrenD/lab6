@@ -1,6 +1,7 @@
+const fs = require('fs');
+
 module.exports = async function (context, req) {
-    const { method } = req.method;
-    const fs = require('fs');
+    const method = req.method;
     switch (method) {
         case 'GET':
             await getCars(context);
@@ -12,14 +13,13 @@ module.exports = async function (context, req) {
             await updateCar(context, req.params.id, req.body);
             break;
         case 'DELETE':
-            await deleteCar(context, req.params.id);
+            await deleteCar(context, req.query.index); // Use req.params.id directly
             break;
         default:
-            await getCars(context);
-            //context.res = {
-            //    status: 405,
-            //    body: 'Method Not Allowed'
-            //};
+            context.res = {
+                status: 405,
+                body: 'Method Not Allowed'
+            };
             break;
     }
 };
@@ -34,27 +34,39 @@ async function getCars(context) {
 
 async function addCar(context, newCar) {
     cars.push(newCar);
-    context.res = {
-        body: cars
-    };
-
-    // Write updated cars array to cars.json
-  try {
-    const data = JSON.stringify(cars, null, 2);  // Stringify with indentation
-    await fs.promises.writeFile('./cars.json', data);
-  } catch (error) {
-    console.error('Error writing to cars.json:', error);
-    // Handle the error appropriately (e.g., return error response)
-  }
+    try {
+        const data = JSON.stringify(cars, null, 2);  
+        await fs.promises.writeFile('./cars.json', data);
+        context.res = {
+            status: 201,
+            body: newCar
+        };
+    } catch (error) {
+        console.error('Error writing to cars.json:', error);
+        context.res = {
+            status: 500,
+            body: 'Internal Server Error'
+        };
+    }
 }
 
 async function updateCar(context, id, updatedCar) {
     const index = cars.findIndex(car => car.id === id);
     if (index !== -1) {
         cars[index] = updatedCar;
-        context.res = {
-            body: updatedCar
-        };
+        try {
+            const data = JSON.stringify(cars, null, 2);  
+            await fs.promises.writeFile('./cars.json', data);
+            context.res = {
+                body: updatedCar
+            };
+        } catch (error) {
+            console.error('Error writing to cars.json:', error);
+            context.res = {
+                status: 500,
+                body: 'Internal Server Error'
+            };
+        }
     } else {
         context.res = {
             status: 404,
@@ -63,13 +75,50 @@ async function updateCar(context, id, updatedCar) {
     }
 }
 
-async function deleteCar(context, id) {
-    const index = cars.findIndex(car => car.id === id);
-    if (index !== -1) {
-        cars.splice(index, 1);
-        context.res = {
-            body: { message: `Car with id ${id} deleted` }
-        };
+// async function deleteCar(context, id) {
+//     const index = cars.findIndex(car => car.id === id);
+//     if (index !== -1) {
+//         cars.splice(index, 1);
+//         try {
+//             const data = JSON.stringify(cars, null, 2);  
+//             await fs.promises.writeFile('./cars.json', data);
+//             context.res = {
+//                 body: { message: `Car with id ${id} deleted` }
+//             };
+//         } catch (error) {
+//             console.error('Error writing to cars.json:', error);
+//             context.res = {
+//                 status: 500,
+//                 body: 'Internal Server Error'
+//             };
+//         }
+//     } else {
+//         context.res = {
+//             status: 404,
+//             body: 'Car not found'
+//         };
+//     }
+// }
+
+
+async function deleteCar(context, index) {
+    const carIndex = parseInt(index); // Convert index to an integer
+    if (!isNaN(carIndex) && carIndex >= 0 && carIndex < cars.length) {
+        cars.splice(carIndex, 1);
+        try {
+            const data = JSON.stringify(cars, null, 2);  
+            await fs.promises.writeFile('./cars.json', data);
+            context.res = {
+                status: 200,
+                body: { message: `Car with index ${carIndex} deleted` }
+            };
+        } catch (error) {
+            console.error('Error writing to cars.json:', error);
+            context.res = {
+                status: 500,
+                body: 'Internal Server Error'
+            };
+        }
     } else {
         context.res = {
             status: 404,
@@ -77,3 +126,5 @@ async function deleteCar(context, id) {
         };
     }
 }
+
+
