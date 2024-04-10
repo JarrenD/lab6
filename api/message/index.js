@@ -46,7 +46,13 @@ app.post('/cars', (req, res) => {
     res.json(newCar);
 });
 
-//start app at localhost:3001
-app.listen(3001, () => {
-    console.log('Server started at http://localhost:3001');
+module.exports = async function (context, req) {
+    context.res.json({
+        text: "Hello from the API"
+    });
+};
+
+//start app at localhost:4280
+app.listen(4280, () => {
+    console.log('Server started at http://localhost:4280');
 });
