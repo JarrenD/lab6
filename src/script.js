@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 });
-
 function addCar(newCar) {
     fetch('/api/message', {
         method: 'POST',
@@ -48,15 +47,15 @@ function addCar(newCar) {
         });
 }
 
-// Event delegation for remove buttons
-document.getElementById('carList').addEventListener('click', event => {
-    if (event.target.classList.contains('btn-remove')) {
-        const index = event.target.dataset.index;
-        removeCar(index);
-    }
+carForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const make = document.getElementById('make').value;
+    const model = document.getElementById('model').value;
+    const year = document.getElementById('year').value;
+    const price = document.getElementById('price').value;
+    addCar({ make, model, year, price });
+    carForm.reset();
 });
-
-
 
 // Function to remove a car
 function removeCar(index) {
@@ -75,14 +74,10 @@ function removeCar(index) {
             console.error('Error:', error);
         });
 }
-
-const carForm = document.getElementById('carForm');
-carForm.addEventListener('submit', event => {
-    event.preventDefault();
-    const make = document.getElementById('make').value;
-    const model = document.getElementById('model').value;
-    const year = document.getElementById('year').value;
-    const price = document.getElementById('price').value;
-    addCar({ make, model, year, price });
-    carForm.reset();
+// Event delegation for remove buttons
+carList.addEventListener('click', event => {
+    if (event.target.classList.contains('btn-remove')) {
+        const index = event.target.dataset.index;
+        removeCar(index);
+    }
 });
